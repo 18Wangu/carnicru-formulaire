@@ -3,167 +3,240 @@
 import { useState } from "react";
 
 const Formulaire = () => {
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
+    nomChien: "",
     sexe: "",
-    problemeSante: false,
-    detailsProblemeSante: "",
-    poids: 3,
-    race: "",
-    sterilisation: false,
-    niveauActivite: "",
-    etatPhysique: "",
+    poids: "",
+    activite: "",
+    corpulence: "",
   });
 
-  const [result, setResult] = useState("");
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    const checked = type === "checkbox" ? (e.target as HTMLInputElement).checked : undefined; // Type assertion for checked
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const goToNextStep = () => {
+    if (currentStep < 6) setCurrentStep(currentStep + 1);
+  };
 
-    // Calcul de la portion en fonction des données saisies
-    const poids = parseFloat(formData.poids.toString());
-    let portion = 0;
+  const goToPreviousStep = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
+  };
 
-    if (poids < 15) {
-      // Petit chien
-      portion = poids * (formData.etatPhysique === "maigre" ? 0.1 : formData.etatPhysique === "normal" ? 0.08 : 0.06);
-    } else if (poids < 40) {
-      // Moyen chien
-      portion = poids * (formData.etatPhysique === "maigre" ? 0.07 : formData.etatPhysique === "normal" ? 0.06 : 0.05);
-    } else {
-      // Grand chien
-      portion = poids * (formData.etatPhysique === "maigre" ? 0.05 : formData.etatPhysique === "normal" ? 0.04 : 0.035);
-    }
-
-    // Ajustement pour stérilisation
-    if (formData.sterilisation) {
-      portion *= 0.95;
-    }
-
-    // Formatage du résultat
-    setResult(`Portion quotidienne recommandée : ${portion.toFixed(2)} kg`);
+  const handleConfirm = () => {
+    console.log("Résumé des informations :");
+    console.log(formData);
+    alert("Les informations ont été affichées dans la console !");
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Formulaire Nutrition</h1>
-      <form onSubmit={handleSubmit}>
-        {/* Carte d'identité */}
-        <div className="mb-4">
-          <h2 className="text-xl font-bold">Carte d'identité</h2>
-          <div className="mb-2">
-            <label className="block font-medium">Sexe :</label>
-            <select name="sexe" onChange={handleInputChange} className="border rounded p-2">
-              <option value="">-- Choisir --</option>
-              <option value="male">Mâle</option>
-              <option value="femelle">Femelle</option>
-            </select>
-          </div>
-          <div className="mb-2">
-            <label className="block font-medium">Problème de santé :</label>
-            <input
-              type="checkbox"
-              name="problemeSante"
-              onChange={handleInputChange}
-              className="mr-2"
-            />
-            <span>Oui</span>
-          </div>
-          {formData.problemeSante && (
-            <div className="mb-2">
-              <label className="block font-medium">Détails :</label>
-              <input
-                type="text"
-                name="detailsProblemeSante"
-                onChange={handleInputChange}
-                className="border rounded p-2 w-full"
-              />
-            </div>
-          )}
-          <div className="mb-2">
-            <label className="block font-medium">Poids (entre 3kg et 80kg) :</label>
-            <input
-              type="number"
-              name="poids"
-              min={3}
-              max={80}
-              step={0.1}
-              value={formData.poids}
-              onChange={handleInputChange}
-              className="border rounded p-2 w-full"
-            />
-          </div>
-          <div className="mb-2">
-            <label className="block font-medium">Race :</label>
+    <div className="flex items-center justify-center h-screen bg-black text-white">
+      <div className="bg-green-600 rounded-lg p-6 shadow-lg w-[400px]">
+        {/* Étape 1 */}
+        {currentStep === 1 && (
+          <>
+            <h2 className="text-xl font-bold mb-4 text-center">Quelques questions...</h2>
+            <label className="block text-center mb-4">Mon chien s'appelle :</label>
             <input
               type="text"
-              name="race"
+              name="nomChien"
+              value={formData.nomChien}
               onChange={handleInputChange}
-              className="border rounded p-2 w-full"
+              placeholder="Entrer son nom ici ..."
+              className="w-full p-2 rounded-lg border-none focus:outline-none text-center text-black"
             />
-          </div>
-          <div className="mb-2">
-            <label className="block font-medium">Stérilisation :</label>
-            <input
-              type="checkbox"
-              name="sterilisation"
-              onChange={handleInputChange}
-              className="mr-2"
-            />
-            <span>Oui</span>
-          </div>
-          <div className="mb-2">
-            <label className="block font-medium">Niveau d'activité :</label>
-            <select
-              name="niveauActivite"
-              onChange={handleInputChange}
-              className="border rounded p-2"
+            <button
+              onClick={goToNextStep}
+              className="bg-green-300 text-black font-bold py-2 px-4 rounded-lg w-full mt-4"
             >
-              <option value="">-- Choisir --</option>
-              <option value="canape">Canapé</option>
-              <option value="actif">Actif</option>
-              <option value="sportif">Sportif</option>
-            </select>
-          </div>
-          <div className="mb-2">
-            <label className="block font-medium">État physique :</label>
-            <select
-              name="etatPhysique"
-              onChange={handleInputChange}
-              className="border rounded p-2"
-            >
-              <option value="">-- Choisir --</option>
-              <option value="maigre">Maigre</option>
-              <option value="normal">Normal</option>
-              <option value="surpoids">Surpoids</option>
-            </select>
-          </div>
-        </div>
+              Suivant
+            </button>
+          </>
+        )}
 
-        {/* Bouton de soumission */}
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Calculer la portion
-        </button>
-      </form>
+        {/* Étape 2 */}
+        {currentStep === 2 && (
+          <>
+            <h2 className="text-xl font-bold mb-4 text-center">Son sexe :</h2>
+            <div className="flex justify-around mb-6">
+              <button
+                onClick={() => setFormData((prev) => ({ ...prev, sexe: "mâle" }))}
+                className={`py-2 px-4 rounded-lg font-bold ${
+                  formData.sexe === "mâle" ? "bg-red-700" : "bg-red-500"
+                }`}
+              >
+                Mâle
+              </button>
+              <button
+                onClick={() => setFormData((prev) => ({ ...prev, sexe: "femelle" }))}
+                className={`py-2 px-4 rounded-lg font-bold ${
+                  formData.sexe === "femelle" ? "bg-red-700" : "bg-red-500"
+                }`}
+              >
+                Femelle
+              </button>
+            </div>
+            <div className="flex justify-between">
+              <button
+                onClick={goToPreviousStep}
+                className="bg-green-300 text-black font-bold py-2 px-4 rounded-lg"
+              >
+                Précédent
+              </button>
+              <button
+                onClick={goToNextStep}
+                className="bg-green-300 text-black font-bold py-2 px-4 rounded-lg"
+              >
+                Suivant
+              </button>
+            </div>
+          </>
+        )}
 
-      {/* Résultat */}
-      {result && (
-        <div className="mt-4 p-4 border rounded bg-gray-50">
-          <h2 className="text-lg font-bold">Résultat</h2>
-          <p>{result}</p>
+        {/* Étape 3 */}
+        {currentStep === 3 && (
+          <>
+            <h2 className="text-xl font-bold mb-4 text-center">Son poids :</h2>
+            <div className="flex justify-center mb-6">
+              <input
+                type="number"
+                name="poids"
+                value={formData.poids}
+                onChange={handleInputChange}
+                placeholder="Entrer le poids (kg)"
+                className="text-center text-black py-2 px-4 rounded-lg w-[100px]"
+              />
+              <span className="ml-2 text-lg">kg</span>
+            </div>
+            <div className="flex justify-between">
+              <button
+                onClick={goToPreviousStep}
+                className="bg-green-300 text-black font-bold py-2 px-4 rounded-lg"
+              >
+                Précédent
+              </button>
+              <button
+                onClick={goToNextStep}
+                className="bg-green-300 text-black font-bold py-2 px-4 rounded-lg"
+              >
+                Suivant
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Étape 4 */}
+        {currentStep === 4 && (
+          <>
+            <h2 className="text-xl font-bold mb-4 text-center">Niveau d'activité :</h2>
+            <div className="flex justify-around mb-6">
+              {["Canapé", "Actif", "Sportif"].map((level) => (
+                <button
+                  key={level}
+                  onClick={() => setFormData((prev) => ({ ...prev, activite: level }))}
+                  className={`py-2 px-4 rounded-lg font-bold ${
+                    formData.activite === level ? "bg-red-700" : "bg-red-500"
+                  }`}
+                >
+                  {level}
+                </button>
+              ))}
+            </div>
+            <div className="flex justify-between">
+              <button
+                onClick={goToPreviousStep}
+                className="bg-green-300 text-black font-bold py-2 px-4 rounded-lg"
+              >
+                Précédent
+              </button>
+              <button
+                onClick={goToNextStep}
+                className="bg-green-300 text-black font-bold py-2 px-4 rounded-lg"
+              >
+                Suivant
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Étape 5 */}
+        {currentStep === 5 && (
+          <>
+            <h2 className="text-xl font-bold mb-4 text-center">Corpulence :</h2>
+            <div className="flex justify-around mb-6">
+              {["Maigre", "Normal", "Surpoids"].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setFormData((prev) => ({ ...prev, corpulence: type }))}
+                  className={`py-2 px-4 rounded-lg font-bold ${
+                    formData.corpulence === type ? "bg-red-700" : "bg-red-500"
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+            <div className="flex justify-between">
+              <button
+                onClick={goToPreviousStep}
+                className="bg-green-300 text-black font-bold py-2 px-4 rounded-lg"
+              >
+                Précédent
+              </button>
+              <button
+                onClick={goToNextStep}
+                className="bg-green-300 text-black font-bold py-2 px-4 rounded-lg"
+              >
+                Suivant
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Étape 6 */}
+        {currentStep === 6 && (
+          <>
+            <h2 className="text-xl font-bold mb-4 text-center">Résumé des informations :</h2>
+            <ul className="mb-6">
+              {Object.entries(formData).map(([key, value]) => (
+                <li key={key} className="mb-2">
+                  <strong>{key} :</strong> {value || "Non renseigné"}
+                </li>
+              ))}
+            </ul>
+            <div className="flex justify-between">
+              <button
+                onClick={goToPreviousStep}
+                className="bg-green-300 text-black font-bold py-2 px-4 rounded-lg"
+              >
+                Précédent
+              </button>
+              <button
+                onClick={handleConfirm}
+                className="bg-red-500 text-white font-bold py-2 px-4 rounded-lg"
+              >
+                Confirmer
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Barre de progression */}
+        <div className="mt-4">
+          <div className="bg-green-800 h-2 rounded-full overflow-hidden">
+            <div
+              className="bg-green-300 h-full"
+              style={{ width: `${(currentStep / 6) * 100}%` }}
+            ></div>
+          </div>
+          <p className="text-center mt-2">{6 - currentStep} questions restantes</p>
         </div>
-      )}
+      </div>
     </div>
   );
 };
